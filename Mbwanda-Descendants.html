@@ -5,6 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
 <title>Mbwanda-Descendants — Carnet de comptes</title>
+<script>
+/* Applique le thème avant le premier affichage (évite le flash blanc).
+   Par défaut : mode sombre. Le choix de l'utilisateur est mémorisé. */
+(function(){
+  var t='dark';
+  try{var s=localStorage.getItem('mbwanda-theme');if(s==='dark'||s==='light')t=s;}catch(e){}
+  document.documentElement.setAttribute('data-theme',t);
+})();
+</script>
 <style>
 :root{
   --bg:#f2f5f7; --card:#ffffff; --ink:#1b2530; --muted:#6a7583;
@@ -25,6 +34,18 @@
   --line-strong:#5b6b7b;
   --shadow:0 1px 2px rgba(0,0,0,.45),0 2px 8px rgba(0,0,0,.35);
   color-scheme:dark;
+}
+/* Repli si JavaScript est désactivé : on suit alors la préférence système */
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme]){
+    --bg:#0e141a; --card:#161e26; --ink:#e9eef4; --muted:#94a3b4;
+    --line:#2a3541; --accent:#2fbf9d; --accent-dark:#239b7d;
+    --green:#4ade80; --green-bg:#12301f; --amber:#fbbf24; --amber-bg:#382a0d;
+    --red:#f87171; --red-bg:#3b1714;
+    --hover:#222d38; --toast-bg:#0a1017; --invalid-bg:#2a1a18;
+    --on-accent:#05231d; --accent-soft:rgba(47,191,157,.22); --line-strong:#5b6b7b;
+    color-scheme:dark;
+  }
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -55,22 +76,33 @@ input,select{font:inherit;color:inherit}
 .brand p{margin:1px 0 0;font-size:12.5px;color:var(--muted)}
 .topbar-actions{display:flex;flex-wrap:wrap;gap:8px}
 
+/* ---------- Bascule clair / sombre ---------- */
+.theme-fab{position:fixed;right:16px;bottom:18px;z-index:55;display:inline-flex;align-items:center;gap:8px;
+  border:0;border-radius:99px;padding:12px 18px 12px 14px;background:var(--accent);color:var(--on-accent);
+  font-size:14.5px;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.35);transition:transform .18s,background .18s}
+.theme-fab:hover{background:var(--accent-dark)}
+.theme-fab:active{transform:scale(.97)}
+.theme-fab .fab-icon{font-size:19px;line-height:1}
+body.toast-on .theme-fab{transform:translateY(-72px)}
+#btnTheme{border-color:var(--accent);color:var(--accent);font-weight:600}
+#btnTheme:hover{background:var(--accent-soft)}
+
 /* ---------- Boutons ---------- */
 .btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-strong);background:var(--card);
   color:var(--ink);padding:8px 12px;border-radius:9px;font-size:14px;font-weight:500;
-  transition:background .12s,border-color .12s,transform .05s}
-.btn:hover{background:var(--hover);border-color:var(--line)}
+  transition:background .12s,border-color .12s,transform .05s,color .12s}
+.btn:hover{background:var(--hover);border-color:var(--muted)}
 .btn:active{transform:translateY(1px)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 .btn.primary:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
 .btn.danger{background:var(--card);border-color:var(--red);color:var(--red)}
 .btn.danger:hover{background:var(--red-bg)}
-.btn.ghost{background:transparent;border-style:dashed}
-.btn.ghost:hover{background:var(--hover)}
+.btn.ghost{background:transparent;border-style:dashed;border-color:var(--line-strong)}
+.btn.ghost:hover{background:var(--hover);border-color:var(--muted)}
 .btn.tiny{padding:4px 9px;font-size:13px;border-radius:7px}
-.icon-btn{border:1px solid var(--line-strong);background:var(--card);border-radius:8px;width:32px;height:30px;
-  display:inline-flex;align-items:center;justify-content:center;font-size:14px;line-height:1;padding:0}
-.icon-btn:hover{background:var(--hover)}
+.icon-btn{border:1px solid var(--line-strong);background:var(--card);border-radius:8px;width:34px;height:32px;
+  display:inline-flex;align-items:center;justify-content:center;font-size:15px;line-height:1;padding:0}
+.icon-btn:hover{background:var(--hover);border-color:var(--muted)}
 .icon-btn.danger{color:var(--red);border-color:var(--red)}
 .icon-btn.danger:hover{background:var(--red-bg)}
 
@@ -216,7 +248,7 @@ footer{max-width:1150px;margin:0 auto;padding:14px 16px 34px;color:var(--muted);
     </div>
   </div>
   <div class="topbar-actions no-print">
-    <button type="button" class="btn" id="btnTheme" title="Basculer entre le mode clair et le mode sombre">🌙 Mode sombre</button>
+    <button type="button" class="btn" id="btnTheme" title="Basculer entre le fond blanc (texte noir) et le fond noir (texte blanc)">🌙 Mode sombre</button>
     <button type="button" class="btn" id="btnCsv" title="Exporter les données visibles (période + filtres actifs) au format CSV">⬇ Export CSV</button>
     <button type="button" class="btn" id="btnBackup" title="Télécharger une sauvegarde JSON complète">💾 Sauvegarde</button>
     <button type="button" class="btn" id="btnRestore" title="Restaurer une sauvegarde JSON (remplacer ou fusionner)">♻ Restaurer</button>
@@ -475,6 +507,12 @@ footer{max-width:1150px;margin:0 auto;padding:14px 16px 34px;color:var(--muted);
 <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 <div id="modalRoot"></div>
 
+<button type="button" class="theme-fab" id="btnThemeFab" aria-label="Basculer entre fond blanc texte noir et fond noir texte blanc" title="Basculer clair / sombre">
+  <span class="fab-icon" id="fabIcon">☀️</span><span id="fabLabel">Mode clair</span>
+</button>
+
+<noscript><div class="banner">⚠ JavaScript est désactivé : la bascule clair/sombre et la sauvegarde locale ne fonctionneront pas.</div></noscript>
+
 <script>
 (function(){
 'use strict';
@@ -555,10 +593,17 @@ function chipHTML(color,label){
 function applyTheme(t){
   theme=(t==='dark')?'dark':'light';
   document.documentElement.setAttribute('data-theme',theme);
+  var label=theme==='dark'?'☀️ Mode clair':'🌙 Mode sombre';
   var b=$('btnTheme');
   if(b){
-    b.textContent=theme==='dark'?'☀️ Mode clair':'🌙 Mode sombre';
+    b.textContent=label;
     b.setAttribute('aria-pressed',theme==='dark'?'true':'false');
+  }
+  var fab=$('btnThemeFab');
+  if(fab){
+    if($('fabIcon'))$('fabIcon').textContent=theme==='dark'?'☀️':'🌙';
+    if($('fabLabel'))$('fabLabel').textContent=theme==='dark'?'Mode clair':'Mode sombre';
+    fab.setAttribute('aria-pressed',theme==='dark'?'true':'false');
   }
   try{localStorage.setItem(THEME_KEY,theme);}catch(e){}
   if(typeof renderAll==='function')renderAll();
@@ -566,10 +611,7 @@ function applyTheme(t){
 function initTheme(){
   var stored=null;
   try{stored=localStorage.getItem(THEME_KEY);}catch(e){}
-  if(stored!=='dark'&&stored!=='light'){
-    stored=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';
-  }
-  theme=stored;
+  theme=(stored==='dark'||stored==='light')?stored:'dark';
   document.documentElement.setAttribute('data-theme',theme);
 }
 
@@ -1000,7 +1042,7 @@ function clearErrors(ids){ids.forEach(function(id){setErr(id,'');});}
 
 /* ================= Toast & modale ================= */
 var toastTimer=null,undoHandler=null;
-function hideToast(){$('toast').hidden=true;$('toast').innerHTML='';clearTimeout(toastTimer);}
+function hideToast(){$('toast').hidden=true;$('toast').innerHTML='';clearTimeout(toastTimer);document.body.classList.remove('toast-on');}
 function showToast(msg,withUndo,tone){
   clearTimeout(toastTimer);
   var t=$('toast');
@@ -1009,6 +1051,7 @@ function showToast(msg,withUndo,tone){
     (withUndo?'<button type="button" class="toast-undo" id="toastUndo">Annuler</button>':'')+
     (withUndo?'<span class="toast-progress"></span>':'');
   t.hidden=false;
+  document.body.classList.add('toast-on');
   if(withUndo){
     $('toastUndo').onclick=function(){
       var h=undoHandler;undoHandler=null;hideToast();
@@ -1508,6 +1551,7 @@ initBackupActions();
 initKeyboard();
 $('btnSamples').addEventListener('click',loadSamples);
 $('btnTheme').addEventListener('click',function(){applyTheme(theme==='dark'?'light':'dark');});
+$('btnThemeFab').addEventListener('click',function(){applyTheme(theme==='dark'?'light':'dark');});
 $('periodSel').value=ui.period;
 applyTheme(theme);
 renderPrintMeta();
